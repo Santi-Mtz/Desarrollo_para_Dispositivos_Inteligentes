@@ -21,7 +21,10 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Santiago de Querétaro', style: TextStyle(fontSize: 24)),
+              const Text(
+                'Santiago de Querétaro',
+                style: TextStyle(fontSize: 24),
+              ),
               const SizedBox(height: 32),
               const Icon(Icons.cloud, size: 120, color: Colors.blue),
               const SizedBox(height: 32),
