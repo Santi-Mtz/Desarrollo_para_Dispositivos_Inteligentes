@@ -26,4 +26,4 @@ class TemperatureCard extends StatelessWidget {
       ],
     );
   }
-}
+} 
