@@ -18,4 +18,4 @@ class WeatherIcon extends StatelessWidget {
       return Icon(Icons.ac_unit, size: size, color: Colors.lightBlue);
     return Icon(Icons.wb_sunny, size: size, color: Colors.orange);
   }
-}
+} 
