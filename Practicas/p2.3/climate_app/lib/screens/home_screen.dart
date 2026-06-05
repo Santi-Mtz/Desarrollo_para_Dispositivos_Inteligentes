@@ -5,8 +5,22 @@ import '../providers/weather_provider.dart';
 import '../utils/weather_utils.dart';
 import 'search_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      context.read<WeatherProvider>().loadWeather('Santiago');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,13 +29,32 @@ class HomeScreen extends StatelessWidget {
         builder: (context, provider, child) {
           final weather = provider.weather;
 
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.errorMessage != null) {
+            return Center(child: Text(provider.errorMessage!));
+          }
+
+          if (weather == null) {
+            return const Center(child: Text('No data'));
+          }
+
+          final temperature = provider.temperatureUnit == '°C'
+              ? WeatherUtils.formatTemperature(weather.temperature, 'C')
+              : WeatherUtils.formatTemperature(
+                  WeatherUtils.celsiusToFahrenheit(weather.temperature),
+                  'F',
+                );
+
           return Center(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    formatTemperature(weather.temp, weather.unit),
+                    temperature,
                     style: const TextStyle(
                       fontSize: 72,
                       fontWeight: FontWeight.bold,
@@ -29,49 +62,45 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    weather.city,
-                    style: const TextStyle(fontSize: 24),
-                  ),
+                  Text(weather.city, style: const TextStyle(fontSize: 24)),
                   const SizedBox(height: 24),
-                  Icon(
-                    getWeatherIcon(weather.condition),
-                    size: 120,
-                    color: Colors.blue,
+                  Text(
+                    WeatherUtils.getWeatherIcon(weather.condition),
+                    style: const TextStyle(fontSize: 80),
                   ),
                   const SizedBox(height: 24),
                   Text('Condición: ${weather.condition}'),
                   const SizedBox(height: 8),
-                  const Text('Humedad: 65% | Viento: 12 km/h'),
+                  Text('Humedad: ${weather.humidity}% | Viento: 12 km/h'),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: () {
-                      provider.changeCity(
-                        weather.city == 'Santiago de Querétaro'
-                            ? 'Ciudad de México'
-                            : 'Santiago de Querétaro',
-                      );
+                      provider.toggleTemperatureUnit();
                     },
-                    child: const Text('Cambiar ciudad'),
+                    child: const Text('Cambiar unidad'),
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () {
-                      provider.changeTemperature(
-                        weather.temp == 24 ? 30 : 24,
+                      provider.updateTemperature(
+                        weather.temperature == 24 ? 30 : 24,
                       );
                     },
                     child: const Text('Cambiar temperatura'),
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      final result = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const SearchScreen(),
                         ),
                       );
+
+                      if (result != null && result.isNotEmpty) {
+                        await context.read<WeatherProvider>().loadWeather(result);
+                      }
                     },
                     child: const Text('Buscar Ciudades'),
                   ),

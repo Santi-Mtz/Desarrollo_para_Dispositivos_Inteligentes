@@ -1,62 +1,57 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-import '../models/weather.dart';
+import '../models/weather_model.dart';
 
 class WeatherProvider extends ChangeNotifier {
-  Weather _weather = const Weather(
-    city: 'Santiago de Querétaro',
-    temp: 24,
-    condition: 'cloudy',
-    unit: 'C',
-  );
+  Weather? _weather;
+  bool _isLoading = false;
+  String? _errorMessage;
+  int _tempUnit = 0;
 
-  Weather get weather => _weather;
+  Weather? get weather => _weather;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  String get temperatureUnit => _tempUnit == 0 ? '°C' : '°F';
 
-  bool updateWeather({
-    required String city,
-    required double temp,
-    required String condition,
-    String unit = 'C',
-  }) {
-    if (city.trim().isEmpty) return false;
-    if (temp < -60 || temp > 60) return false;
-    if (condition.trim().isEmpty) return false;
-    if (unit.trim().isEmpty) return false;
+  Future<void> loadWeather(String city) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
+    try {
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (city.trim().isEmpty) {
+        throw Exception('Ciudad inválida');
+      }
+
+      _weather = Weather(
+        city: city.trim(),
+        temperature: 24,
+        condition: 'cloudy',
+        humidity: 65,
+      );
+    } catch (e) {
+      _errorMessage = 'Error loading weather: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void toggleTemperatureUnit() {
+    _tempUnit = _tempUnit == 0 ? 1 : 0;
+    notifyListeners();
+  }
+
+  void updateTemperature(int newTemp) {
+    if (_weather == null) return;
     _weather = Weather(
-      city: city.trim(),
-      temp: temp,
-      condition: condition.trim(),
-      unit: unit.trim().toUpperCase(),
+      city: _weather!.city,
+      temperature: newTemp,
+      condition: _weather!.condition,
+      humidity: _weather!.humidity,
     );
     notifyListeners();
-    return true;
-  }
-
-  void changeCity(String city) {
-    updateWeather(
-      city: city,
-      temp: _weather.temp,
-      condition: _weather.condition,
-      unit: _weather.unit,
-    );
-  }
-
-  void changeTemperature(double temp) {
-    updateWeather(
-      city: _weather.city,
-      temp: temp,
-      condition: _weather.condition,
-      unit: _weather.unit,
-    );
-  }
-
-  void changeCondition(String condition) {
-    updateWeather(
-      city: _weather.city,
-      temp: _weather.temp,
-      condition: condition,
-      unit: _weather.unit,
-    );
   }
 }
