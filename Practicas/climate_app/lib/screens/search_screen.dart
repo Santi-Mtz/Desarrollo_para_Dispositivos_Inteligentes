@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -8,12 +7,15 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  List<String> cities = ['Santiago', 'Querétaro', 'México'];
-  List<String> filtered = [];
+  String searchQuery = '';
+  List<String> cities = ['Santiago', 'Querétaro', 'México', 'Guadalajara'];
+  List<String> filteredCities = [];
+
   void filterCities(String query) {
     setState(() {
-      filtered = cities
-          .where((c) => c.toLowerCase().contains(query.toLowerCase()))
+      searchQuery = query;
+      filteredCities = cities
+          .where((city) => city.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
@@ -35,24 +37,19 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: filtered.isEmpty ? cities.length : filtered.length,
-              itemBuilder: (context, index) {
-                final city = filtered.isEmpty ? cities[index] : filtered[index];
-                return ListTile(
-                  title: Text(city),
-                  subtitle: const Text('24°C '),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailScreen(city: city),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+            child: filteredCities.isEmpty
+                ? const Center(child: Text('No encontradas'))
+                : ListView.builder(
+                    itemCount: filteredCities.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(filteredCities[index]),
+                        onTap: () {
+                          Navigator.pop(context, filteredCities[index]);
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
