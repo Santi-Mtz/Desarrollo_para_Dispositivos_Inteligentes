@@ -1,40 +1,31 @@
-import 'package:flutter/foundation.dart';
-
+import 'package:flutter/material.dart';
 import '../models/weather_model.dart';
-import '../utils/weather_utils.dart';
+import '../services/weather_service.dart';
 
 class WeatherProvider extends ChangeNotifier {
+  final WeatherService _service = WeatherService(); // <-- Instancia del servicio HTTP real
   Weather? _weather;
   bool _isLoading = false;
-  String? _errorMessage;
-  int _tempUnit = 0;
+  String? _error;
+  int _tempUnit = 0; // 0 = °C, 1 = °F
 
   Weather? get weather => _weather;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  String? get error => _error; 
   String get temperatureUnit => _tempUnit == 0 ? '°C' : '°F';
 
-  Future<void> loadWeather(String city) async {
+  // Cambiado a fetchWeather para usar la lógica de la práctica con la API real
+  Future<void> fetchWeather(String city) async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
-
+    
     try {
-      final normalizedCity = city.trim();
-      if (normalizedCity.isEmpty) {
-        throw const FormatException('City cannot be empty');
-      }
-
-      await Future.delayed(const Duration(seconds: 1));
-
-      _weather = Weather(
-        city: normalizedCity,
-        temperature: 24,
-        condition: 'cloudy',
-        humidity: 65,
-      );
+      // Llamada real al servicio HTTP de OpenWeatherMap
+      _weather = await _service.getWeather(city);
     } catch (e) {
-      _errorMessage = 'Error loading weather: $e';
+      
+      _error = e.toString().replaceFirst('Exception: ', '');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -44,23 +35,5 @@ class WeatherProvider extends ChangeNotifier {
   void toggleTemperatureUnit() {
     _tempUnit = _tempUnit == 0 ? 1 : 0;
     notifyListeners();
-  }
-
-  void updateTemperature(int newTemp) {
-    if (!WeatherUtils.isValidTemperature(newTemp)) {
-      _errorMessage = 'Temperature out of range';
-      notifyListeners();
-      return;
-    }
-
-    if (_weather != null) {
-      _weather = Weather(
-        city: _weather!.city,
-        temperature: newTemp,
-        condition: _weather!.condition,
-        humidity: _weather!.humidity,
-      );
-      notifyListeners();
-    }
   }
 }
