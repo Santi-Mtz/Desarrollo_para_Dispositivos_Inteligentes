@@ -1,65 +1,37 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-
-import 'ble_constants.dart';
+import 'package:flutter/services.dart';
 import 'sensor_simulator.dart';
 
 class BleServer {
   final SensorSimulator simulator;
+  static const _channel = MethodChannel('ble_peripheral_channel');
   bool _advertising = false;
 
   BleServer(this.simulator);
 
   bool get isAdvertising => _advertising;
 
-  // Convertir int a bytes little-endian (4 bytes)
-  Uint8List _intToBytes(int value) {
-    final data = ByteData(4);
-    data.setInt32(0, value, Endian.little);
-    return data.buffer.asUint8List();
-  }
-
-  // Convertir int a bytes (2 bytes)
-  Uint8List _int16ToBytes(int value) {
-    final data = ByteData(2);
-    data.setInt16(0, value, Endian.little);
-    return data.buffer.asUint8List();
-  }
-
-  // Iniciar advertising y GATT server
   Future<void> startAdvertising() async {
     try {
-      // Verificar que BLE está encendido
-      final state = await FlutterBluePlus.adapterState.first;
-      if (state != BluetoothAdapterState.on) {
-        throw Exception('Bluetooth desactivado. Actívalo en el emulador.');
-      }
-
+      await _channel.invokeMethod('start');
+      print('[BleServer] MethodChannel start() invocado correctamente');
       _advertising = true;
       print('[BleServer] Iniciado. Esperando conexiones...');
 
       // Suscribir streams del simulador y notificar cambios
       simulator.stepsStream.listen((steps) {
-        _notifyCharacteristic(BleConstants.stepsUUID, _intToBytes(steps));
+        _channel.invokeMethod('notifySteps', {'value': steps});
       });
 
       simulator.heartRateStream.listen((bpm) {
-        _notifyCharacteristic(
-          BleConstants.heartRateUUID,
-          Uint8List.fromList([bpm]),
-        );
+        _channel.invokeMethod('notifyHeartRate', {'value': bpm});
       });
 
       simulator.caloriesStream.listen((cal) {
-        _notifyCharacteristic(BleConstants.caloriesUUID, _int16ToBytes(cal));
+        _channel.invokeMethod('notifyCalories', {'value': cal});
       });
 
       simulator.statusStream.listen((status) {
-        _notifyCharacteristic(
-          BleConstants.statusUUID,
-          Uint8List.fromList(utf8.encode(status)),
-        );
+        _channel.invokeMethod('notifyStatus', {'value': status});
       });
     } catch (e) {
       _advertising = false;
@@ -68,13 +40,9 @@ class BleServer {
     }
   }
 
-  void _notifyCharacteristic(String uuid, Uint8List data) {
-    print('[BleServer] NOTIFY $uuid: $data');
-  }
-
   void stop() {
+    _channel.invokeMethod('stop');
     _advertising = false;
     simulator.stop();
   }
 }
-

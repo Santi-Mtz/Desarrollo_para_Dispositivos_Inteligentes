@@ -125,7 +125,6 @@ class BleClient {
     }
   }
 
-
   void _handleValue(String uuid, List<int> bytes) {
     if (bytes.isEmpty) return;
 

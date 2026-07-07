@@ -73,10 +73,10 @@ class SensorSimulator {
   }
 
   void stop() {
+    // Importante: no cerrar los StreamControllers aquí.
+    // El wearable reutiliza la misma instancia de SensorSimulator al
+    // alternar "Iniciar"/"Detener". Si cerramos los controllers, el
+    // reinicio produce el error: "Cannot add new events after calling close".
     _timer?.cancel();
-    _stepsCtrl.close();
-    _heartRateCtrl.close();
-    _caloriesCtrl.close();
-    _statusCtrl.close();
   }
 }

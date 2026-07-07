@@ -57,7 +57,6 @@ class ActivityProvider extends ChangeNotifier {
     }
   }
 
-
   Future<void> disconnect() async {
     await _dataSub?.cancel();
     await _client.disconnect();
