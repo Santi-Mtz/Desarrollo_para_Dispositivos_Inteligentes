@@ -1,0 +1,89 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+}
+:root {
+  /* Tipografía 10-foot: mínimo 48px para datos primarios */
+  --fs-temperature: 5rem;
+  --fs-city: 2rem;
+  --fs-condition: 1.5rem;
+  --fs-details: 1.25rem;
+  --fs-header: 1.75rem;
+  
+  /* Safe zone 5% */
+  --safe-v: 54px;
+  --safe-h: 96px;
+  
+  --color-focus: #FFD700;
+  --color-bg: rgba(0,0,0,0.55);
+  --color-card: rgba(255,255,255,0.12);
+  --color-text: #FFFFFF;
+  --color-detail: rgba(255,255,255,0.75);
+}
+html {
+  background: #0a0a1a;
+}
+body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: transparent;
+  color: var(--color-text);
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+#bgVideo {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  transition: opacity 0.5s ease;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.50);
+  z-index: -1;
+}
+.tv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--safe-v) var(--safe-h) 24px;
+  font-size: var(--fs-header);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+.cities-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 32px;
+  padding: 0 var(--safe-h) var(--safe-v);
+  height: calc(1080px - 54px - 120px);
+}
+.city-card {
+  background: var(--color-card);
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  outline: none;
+}
+.city-card.focused {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 4px var(--color-focus),
+              0 8px 32px rgba(255,215,0,0.3);
+  transform: scale(1.02);
+}
+.city-name { font-size: var(--fs-city); font-weight: 700; }
+.temperature { font-size: var(--fs-temperature); font-weight: 800; line-height: 1; }
+.condition { font-size: var(--fs-condition); font-weight: 500; }
+.details { font-size: var(--fs-details); color: var(--color-detail); }

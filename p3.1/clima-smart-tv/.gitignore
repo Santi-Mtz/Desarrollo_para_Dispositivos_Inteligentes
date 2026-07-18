@@ -1,0 +1,8 @@
+# .gitignore
+.env
+node_modules/
+*.jks
+*.keystore
+.DS_Store
+Thumbs.db
+config.js
