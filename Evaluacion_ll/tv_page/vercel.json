@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "https://aegis-wiki-backend.onrender.com/auth/$1"
+    },
+    {
+      "source": "/api/events/(.*)",
+      "destination": "https://aegis-wiki-backend.onrender.com/events/$1"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://aegis-wiki-backend.onrender.com/$1"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
